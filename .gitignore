@@ -13,6 +13,10 @@ dao_training_dojo/backups/
 dao_training_dojo/unsloth_compiled_cache/
 dao_training_dojo/scripts/unsloth_compiled_cache/		
 
+# Model files/directories (Must be excluded)
+dao_model_server/backend/models/
+dao_model_server/models/
+
 *.safetensors
 *.bin
 *.gguf
