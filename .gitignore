@@ -1,0 +1,35 @@
+# 1. ENVIRONMENT (MUST BE EXCLUDED)
+venv/
+*.tar.gz
+*.zip
+
+# 2. MODEL ARTIFACTS (OUTPUTS)
+# These files are large and regenerated frequently; do not commit them.
+dao_training_dojo/outputs/
+dao_training_dojo/prepared_dataset/
+dao_training_dojo/datasets/
+dao_training_dojo/experiments/	
+dao_training_dojo/backups/	
+dao_training_dojo/unsloth_compiled_cache/
+dao_training_dojo/scripts/unsloth_compiled_cache/		
+
+*.safetensors
+*.bin
+*.gguf
+
+# 3. PYTHON & IDE CACHES
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.vscode/
+# 5. EXTERNAL DEPENDENCY EXCLUSION (REQUIRED)
+dao_training_dojo/models/qwen_config/llama.cpp/
+dao_training_dojo/scripts/llama.cpp/
+dao_training_dojo/models/
+dao_model_server/frontend/node_modules/
+envs/dao_ml_env/
+dao_qlora/
+ning_qlora/
+
+# 6. CACHE & TEMP DIRECTORIES
+unsloth_compiled_cache/

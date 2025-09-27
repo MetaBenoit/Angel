@@ -1,0 +1,128 @@
+import requests
+import time
+import logging
+import os
+from typing import Dict, Any, Optional
+import psutil
+
+logger = logging.getLogger(__name__)
+
+class DAOModelService:
+    def __init__(self, model_name: str = "dao"):
+        self.model_name = model_name
+        self.ollama_url = "http://localhost:11434"
+        self.is_loaded = False
+        
+    def load_model(self) -> bool:
+        """Check if Ollama model is available"""
+        try:
+            logger.info(f"Checking Ollama model: {self.model_name}")
+            
+            # Check if Ollama is running
+            response = requests.get(f"{self.ollama_url}/api/tags", timeout=5)
+            if response.status_code == 200:
+                models = response.json().get("models", [])
+                model_names = [model["name"] for model in models]
+                
+                if self.model_name in model_names or f"{self.model_name}:latest" in model_names:
+                    self.is_loaded = True
+                    logger.info(f"Ollama model '{self.model_name}' is available")
+                    return True
+                else:
+                    logger.error(f"Model '{self.model_name}' not found in Ollama. Available: {model_names}")
+                    return False
+            else:
+                logger.error(f"Ollama not responding: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Failed to connect to Ollama: {str(e)}")
+            self.is_loaded = False
+            return False
+    
+    def generate_response(self, prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
+        """Generate response using Ollama API"""
+        if not self.is_loaded:
+            if not self.load_model():
+                return "Sawasdee ka! I apologize, but I'm currently unable to process your request. Please try again later or contact our Ires office directly."
+        
+        try:
+            # Clean the prompt - remove any formatting
+            formatted_prompt = prompt.replace("Human: ", "").replace("Assistant: ", "").strip()
+            
+            payload = {
+                "model": self.model_name,
+                "prompt": formatted_prompt,
+                "stream": False,
+                "options": {
+                    "temperature": temperature,
+                    "num_predict": max_tokens
+                }
+            }
+            
+            response = requests.post(
+                f"{self.ollama_url}/api/generate",
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result.get("response", "I apologize, but I couldn't generate a response. Please contact our Ires office for assistance.").strip()
+            else:
+                logger.error(f"Ollama API error: {response.status_code} - {response.text}")
+                return "I encountered an issue processing your request. Please contact our Ires office for immediate assistance."
+                
+        except Exception as e:
+            logger.error(f"Error generating response: {str(e)}")
+            return f"I apologize, but I encountered a technical issue. Please contact our Ires office directly for assistance with your lifestyle and property inquiry."
+    
+    def get_model_info(self) -> Dict[str, Any]:
+        """Get model information"""
+        return {
+            "model_name": "Dao - Ires LifeStyle Broker",
+            "model_path": "Ollama Service",
+            "device": "Ollama/GPU",
+            "loaded": self.is_loaded,
+            "service": "Ollama",
+            "specialization": "LifeStyle Broker for Ires, Pattaya",
+            "base_model": "Mistral 7B"
+        }
+    
+    def get_memory_usage(self) -> Dict[str, str]:
+        """Get current memory usage"""
+        memory_info = {}
+        
+        try:
+            memory = psutil.virtual_memory()
+            memory_info["system_total"] = f"{memory.total / 1024**3:.2f} GB"
+            memory_info["system_used"] = f"{memory.used / 1024**3:.2f} GB"
+            memory_info["system_percent"] = f"{memory.percent:.1f}%"
+        except Exception as e:
+            logger.warning(f"Could not get system memory info: {e}")
+        
+        # Check Ollama status
+        try:
+            response = requests.get(f"{self.ollama_url}/api/ps", timeout=5)
+            if response.status_code == 200:
+                running_models = response.json().get("models", [])
+                if running_models:
+                    memory_info["ollama_status"] = f"{len(running_models)} model(s) loaded"
+                else:
+                    memory_info["ollama_status"] = "Ready to load models"
+            else:
+                memory_info["ollama_status"] = "Ollama service offline"
+        except Exception:
+            memory_info["ollama_status"] = "Ollama connection failed"
+        
+        return memory_info
+    
+    def unload_model(self):
+        """Unload model (not applicable for Ollama)"""
+        self.is_loaded = False
+        logger.info("Model status reset")
+
+# Global model service instance
+model_service = DAOModelService(
+    model_name=os.getenv("MODEL_NAME", "dao")
+)

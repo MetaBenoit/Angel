@@ -1,0 +1,96 @@
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from app.models import ChatRequest, ChatResponse, ModelStatus, ErrorResponse
+from app.services.model_service import model_service
+import time
+import uuid
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat_with_model(request: ChatRequest, background_tasks: BackgroundTasks):
+    """Chat with the DAO model"""
+    try:
+        start_time = time.time()
+        
+        # Generate conversation ID if not provided
+        conversation_id = request.conversation_id or str(uuid.uuid4())
+        
+        # Format the prompt (customize this based on your model's training)
+        prompt = f"Human: {request.message}\n\nAssistant: "
+        
+        # Generate response
+        response_text = model_service.generate_response(
+            prompt=prompt,
+            temperature=request.temperature or 0.7,
+            max_tokens=request.max_tokens or 1024
+        )
+        
+        processing_time = time.time() - start_time
+        
+        # Log the interaction in background
+        background_tasks.add_task(
+            log_interaction,
+            request.message,
+            response_text,
+            processing_time,
+            conversation_id
+        )
+        
+        return ChatResponse(
+            response=response_text,
+            conversation_id=conversation_id,
+            processing_time=processing_time,
+            model_info=model_service.get_model_info(),
+            timestamp=datetime.now()
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+@router.get("/status", response_model=ModelStatus)
+async def get_model_status():
+    """Get current model status"""
+    try:
+        return ModelStatus(
+            status="ready" if model_service.is_loaded else "loading",
+            model_name="DAO Model Merged",
+            model_loaded=model_service.is_loaded,
+            memory_usage=model_service.get_memory_usage(),
+            last_updated=datetime.now()
+        )
+    except Exception as e:
+        logger.error(f"Error getting model status: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reload")
+async def reload_model():
+    """Reload the model"""
+    try:
+        model_service.unload_model()
+        success = model_service.load_model()
+        
+        if success:
+            return {"message": "Model reloaded successfully", "status": "ready"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to reload model")
+            
+    except Exception as e:
+        logger.error(f"Error reloading model: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def log_interaction(user_message: str, bot_response: str, processing_time: float, conversation_id: str):
+    """Log chat interactions (runs in background)"""
+    logger.info(
+        f"Chat interaction logged - "
+        f"Conversation: {conversation_id}, "
+        f"Processing time: {processing_time:.2f}s, "
+        f"User message length: {len(user_message)}, "
+        f"Response length: {len(bot_response)}"
+    )
