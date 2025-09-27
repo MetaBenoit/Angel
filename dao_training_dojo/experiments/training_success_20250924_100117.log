@@ -1,0 +1,22 @@
+🔍 DAO Training Dojo - System Specifications
+==============================================
+Wed Sep 24 10:01:17 +07 2025
+
+📍 LOCATION & ARCHITECTURE
+Current Directory: /mnt/c/Users/benyr/Angel/dao_training_dojo
+WSL Distribution: Description:	Ubuntu 24.04.3 LTS
+Kernel: 6.6.87.2-microsoft-standard-WSL2
+Architecture: x86_64
+
+🐍 PYTHON ENVIRONMENT
+Python Version: Python 3.12.3
+Pip Version: pip 24.0 from /mnt/c/Users/benyr/Angel/dao_training_dojo/venv/lib/python3.12/site-packages/pip (python 3.12)
+Virtual Environment: /mnt/c/Users/benyr/Angel/dao_training_dojo/venv
+Python Executable: /mnt/c/Users/benyr/Angel/dao_training_dojo/venv/bin/python3
+
+🔧 CUDA & GPU STATUS
+NVIDIA GeForce RTX 5050 Laptop GPU, 8151, 315
+CUDA Available: True
+CUDA Version: 12.8
+
+📦 KEY DEPENDENCIES

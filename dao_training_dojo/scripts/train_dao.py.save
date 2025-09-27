@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+# dao_training_dojo/scripts/train_dao.py
+"""
+Universal Dao Training Script with Unsloth
+Supports both Mistral and Qwen2 architectures
+"""
+
+import sys
+import os
+import argparse
+from datetime import datetime
+from pathlib import Path
+
+# Add models directory to path
+sys.path.append(str(Path(__file__).parent.parent / "models"))
+
+SUPPORTED_MODELS = {
+    'mistral': {
+        'module': 'mistral_config.train_mistral_dao',
+        'class': 'MistralDaoUnslothTrainer',  # Update when you convert to Unsloth
+        'default_name': 'unsloth/mistral-7b-instruct-v0.2-bnb-4bit',
+        'description': 'Fast, stable, conversation-focused (Unsloth optimized)'
+    },
+    'qwen': {
+        'module': 'qwen_config.train_qwen_dao',
+        'class': 'QwenDaoUnslothTrainer',
+        'default_name': 'unsloth/qwen2-7b-instruct-bnb-4bit',
+        'description': 'Superior Thai voice, cultural authenticity (Unsloth optimized)'
+    }
+}
+
+def import_trainer_class(model_type):
+    """Dynamically import trainer class"""
+    config = SUPPORTED_MODELS[model_type]
+    module_name = config['module']
+    class_name = config['class']
+    
+    try:
+        # Import the module
+        module = __import__(module_name, fromlist=[class_name])
+        trainer_class = getattr(module, class_name)
+        return trainer_class
+    except (ImportError, AttributeError) as e:
+        print(f"❌ Error importing {class_name} from {module_name}: {e}")
+        print(f"Make sure the trainer file exists and the class is properly defined.")
+        sys.exit(1)
+
+def main():
+    parser = argparse.ArgumentParser(description='Universal Dao Model Training with Unsloth')
+    parser.add_argument(
+        'model_type', 
+        choices=list(SUPPORTED_MODELS.keys()),
+        help='Model architecture to use'
+    )
+    parser.add_argument(
+        '--model-name',
+        help='Specific model name (overrides default)'
+    )
+    parser.add_argument(
+        '--dataset',
+        default='../datasets/dao_dataset.csv',
+        help='Path to training dataset'
+    )
+    parser.add_argument(
+        '--experiment-name',
+        help='Custom experiment name'
+    )
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Show configuration without training'
+    )
+    parser.add_argument(
+        '--quick-test',
+        action='store_true',
+        help='Quick training test with minimal epochs'
+    )
+    
+    args = parser.parse_args()
+    
+    # Get model configuration
+    model_config = SUPPORTED_MODELS[args.model_type]
+    model_name = args.model_name or model_config['default_name']
+    
+    # Create experiment name
+    if args.experiment_name:
+        experiment_name = args.experiment_name
+    else:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+        experiment_name = f"{args.model_type}_dao_{timestamp}"
+    
+    print("🥋 DAO TRAINING DOJO - UNSLOTH EDITION")
+    print("=" * 60)
+    print(f"Model Type: {args.model_type.upper()}")
+    print(f"Base Model: {model_name}")
+    print(f"Description: {model_config['description']}")
+    print(f"Dataset: {args.dataset}")
+    print(f"Experiment: {experiment_name}")
+    print(f"Quick Test: {'Yes' if args.quick_test else 'No'}")
+    print("=" * 60)
+    
+    # Check dataset exists
+    dataset_path = Path(args.dataset)
+    if not dataset_path.exists():
+        print(f"❌ Dataset not found: {dataset_path}")
+        print("Available datasets:")
+        datasets_dir = Path("../datasets")
+        if datasets_dir.exists():
+            for f in datasets_dir.glob("*.csv"):
+                print(f"  - {f.name}")
+        sys.exit(1)
+    
+    if args.dry_run:
+        print("🔍 DRY RUN - Configuration validated!")
+        return
+    
+    # Import and initialize trainer
+    print(f"📦 Loading {args.model_type} trainer...")
+    TrainerClass = import_trainer_class(args.model_type)
+    trainer = TrainerClass(model_name)
+    
+    # Override experiment name and settings
+    trainer.output_dir = f"../outputs/{experiment_name}"
+    
+    # Quick test mode
+    if args.quick_test:
+        print("⚡ Quick test mode: 1 epoch, small batch")
+        # These settings will need to be implemented in each trainer class
+        if hasattr(trainer, 'set_quick_test_mode'):
+            trainer.set_quick_test_mode()
+    
+    try:
+        print(f"🚀 Starting {args.model_type.upper()} training...")
+        print("=" * 60)
+        
+        # Start training
+        model_path = trainer.train(str(dataset_path))
+        
+        print("\n" + "=" * 60)
+        print("🎉 TRAINING COMPLETE!")
+        print("=" * 60)
+        print(f"Model saved to: {model_path}")
+        print(f"Training logs: {trainer.output_dir}")
+        print("=" * 60)
+        
+        # Generate next steps
+        print("\n📋 NEXT STEPS:")
+        print(f"1. Test model: python -c \"from pathlib import Path; print(Path('{model_path}').exists())\"")
+        print(f"2. Create Ollama model from: {model_path}")
+        print(f"3. Deploy to serving: cp -r {model_path} ../dao_model_server/models/")
+        print(f"4. Update server config with experiment: {experiment_name}")
+        
+        # Model comparison suggestion
+        if args.model_type == 'qwen':
+            print("\n🔬 VOICE COMPARISON:")
+            print("Train Mistral version and compare authentic voice quality:")
+            print(f"python scripts/train_dao.py mistral --experiment-name mistral_comparison")
+        
+    except Exception as e:
+        print(f"❌ Training failed: {str(e)}")
+        print("\n🔍 Debugging tips:")
+        print("1. Check CUDA memory: nvidia-smi")
+        print("2. Verify dataset format: head -5 datasets/dao_dataset.csv")
+        print("3. Test imports: python -c 'from unsloth import FastLanguageModel'")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+

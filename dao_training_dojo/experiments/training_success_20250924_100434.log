@@ -1,0 +1,115 @@
+🔍 DAO Training Dojo - System Specifications
+==============================================
+Wed Sep 24 10:04:35 +07 2025
+
+📍 LOCATION & ARCHITECTURE
+Current Directory: /mnt/c/Users/benyr/Angel/dao_training_dojo
+WSL Distribution: Description:	Ubuntu 24.04.3 LTS
+Kernel: 6.6.87.2-microsoft-standard-WSL2
+Architecture: x86_64
+
+🐍 PYTHON ENVIRONMENT
+Python Version: Python 3.12.3
+Pip Version: pip 24.0 from /mnt/c/Users/benyr/Angel/dao_training_dojo/venv/lib/python3.12/site-packages/pip (python 3.12)
+Virtual Environment: /mnt/c/Users/benyr/Angel/dao_training_dojo/venv
+Python Executable: /mnt/c/Users/benyr/Angel/dao_training_dojo/venv/bin/python3
+
+🔧 CUDA & GPU STATUS
+NVIDIA GeForce RTX 5050 Laptop GPU, 8151, 315
+CUDA Available: True
+CUDA Version: 12.8
+
+📦 KEY DEPENDENCIES
+PyTorch: 2.8.0+cu128
+Transformers: 4.55.4
+PEFT: 0.17.1
+Accelerate: 1.10.1
+BitsAndBytes: 0.47.0
+Unsloth: 🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+2025.9.7
+
+💾 STORAGE & MEMORY
+Available Disk Space:
+C:\             952G  560G  393G  59% /mnt/c
+Memory Usage:
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       1.8Gi        13Gi       4.1Mi       302Mi        13Gi
+Swap:          4.0Gi          0B       4.0Gi
+
+📁 PROJECT STRUCTURE
+Directory Contents:
+.
+./datasets
+./experiments
+./models
+./models/mistral_config
+./models/qwen_config
+./models/qwen_config/unsloth_compiled_cache
+./outputs
+./outputs/qwen_dao
+./outputs/qwen_dao/checkpoint-60
+./outputs/qwen_dao_merged
+./outputs/qwen_dao_merged/.cache
+./scripts
+./unsloth_compiled_cache
+./unsloth_compiled_cache/__pycache__
+./venv
+./venv/bin
+./venv/include
+./venv/include/python3.12
+./venv/lib
+
+Dataset Files:
+total 644
+drwxrwxrwx 1 benyr benyr   4096 Sep 22 18:59 .
+drwxrwxrwx 1 benyr benyr   4096 Sep 24 09:47 ..
+-rwxrwxrwx 1 benyr benyr  90977 Sep 22 17:21 dao_dataset.csv
+-rwxrwxrwx 1 benyr benyr 561262 Sep 22 18:59 dao_dataset.json
+
+Model Config Files:
+models/mistral_config/train_mistral_dao.py
+models/qwen_config/train_qwen_dao.py
+models/qwen_config/unsloth_compiled_cache/UnslothBCOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothCPOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothDPOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothGKDTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothGRPOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothIterativeSFTTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothKTOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothNashMDTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothOnlineDPOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothORPOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothPPOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothPRMTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothRewardTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothRLOOTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothSFTTrainer.py
+models/qwen_config/unsloth_compiled_cache/UnslothXPOTrainer.py
+
+🔍 ENVIRONMENT VARIABLES
+PATH (first 5 entries):
+/mnt/c/Users/benyr/Angel/dao_training_dojo/venv/bin
+/mnt/c/Users/benyr/AppData/Local/Ollama
+/mnt/c/Users/benyr/AppData/Local/Ollama
+/mnt/c/Users/benyr/AppData/Local/Ollama
+/mnt/c/Users/benyr/AppData/Local/Ollama
+PYTHONPATH: 
+CUDA_VISIBLE_DEVICES: 
+
+✅ VERIFICATION TESTS
+Testing critical imports...
+✅ PyTorch 2.8.0+cu128 - CUDA: True
+✅ Transformers 4.55.4
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+✅ Unsloth import successful
+✅ Dataset accessible: 277 entries
+
+📋 NEXT COMMANDS TO RUN
+cd models/qwen_config/
+python3 train_qwen_dao.py
+
+==============================================
+Specs captured at: Wed Sep 24 10:20:20 +07 2025
+Save this output to: experiments/system_specs_20250924_102020.log
